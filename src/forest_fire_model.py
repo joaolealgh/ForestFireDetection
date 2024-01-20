@@ -7,6 +7,19 @@ from keras.layers import Dense, GlobalAveragePooling2D, RandomFlip, RandomRotati
 from matplotlib import pyplot as plt
 import numpy as np
 
+def predict_fire(model, batch):
+    y_hat = model.predict(batch)
+    # y_hat[y_hat > 0] = 1
+    # y_hat[y_hat < 0] = 0
+    
+    # if y_hat > 1:
+    #     return 'Non Fire'
+    # else:
+    #     return 'Fire'
+
+    return np.where(y_hat > 0, 'Non Fire', 'Fire')
+
+
 def data_augmentation_layer():
     # Add more options for data augmentation
     data_augmentation = Sequential([
@@ -15,6 +28,7 @@ def data_augmentation_layer():
     ])
     
     return data_augmentation
+
 
 # Convert into a class
 class ForestFireModel():
@@ -146,13 +160,5 @@ def mobile_net_transfer_learning(IMG_HEIGHT, IMG_WIDTH, CHANNELS, train_ds):
     feature_batch = base_model(image_batch)
     print(feature_batch.shape)
 
-    # global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
-    # feature_batch_average = global_average_layer(feature_batch)
-    # print(feature_batch_average.shape)
-
-
-    # prediction_layer = tf.keras.layers.Dense(1)
-    # prediction_batch = prediction_layer(feature_batch_average)
-    # print(prediction_batch.shape)
 
     return base_model, preprocess_input
