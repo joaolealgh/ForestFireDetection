@@ -1,0 +1,6 @@
+**/.venv
+**/.dist
+datasets/**
+**/.env
+**/forest-fire-images.zip
+**/__pycache__
