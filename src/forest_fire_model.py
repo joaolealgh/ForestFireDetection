@@ -30,7 +30,6 @@ def data_augmentation_layer():
     return data_augmentation
 
 
-# Convert into a class
 class ForestFireModel():
     # Redo the init values in the model
     def __init__(self, base_model):
@@ -79,7 +78,7 @@ class ForestFireModel():
 
 
     def train(self, train_ds, val_ds, initial_epochs=5):
-        checkpoint_path = "training/feature_extraction_model.ckpt"
+        checkpoint_path = "model/training/feature_extraction_model.ckpt"
         checkpoint_dir = os.path.dirname(checkpoint_path)
 
         # Create a callback that saves the model's weights
@@ -117,35 +116,36 @@ class ForestFireModel():
         plt.xlabel('epoch')
         plt.show()
 
+    def predict(self, batch):
+        return self.model.predict(batch)
 
     def save_custom_model(self, path='feature_extraction_model.h5'):
         self.model.save(path)
-
-    # def load_custom_model(self, path=''):
-    #     self.model = load_model(path)
         
+def load_custom_model(path):
+    return load_model(path)
 
-def forest_fire_model(preprocess_input, base_model, train_ds, val_ds, test_ds, load, path='feature_extraction_model.h5'):
-    if load:
-        return load_model(path)
-    else:
-        # Build model and train on the data
-        model = ForestFireModel(base_model)
-        model.build(preprocess_input)
-        pass
-
+def forest_fire_model(preprocess_input, base_model, train_ds, val_ds, test_ds, epochs, model_path):
+    # Build model and train on the data
+    model = ForestFireModel(base_model)
+    model.build(preprocess_input)
+    model.train(train_ds, val_ds, epochs)
+    model.save_custom_model(model_path)
     return model
 
+def get_base_model_information(base_model):
+    if base_model == 'MobileNetV2':
+        return {
+            'IMG_WIDTH': 224,
+            'IMG_HEIGHT': 224
+        }
 
 # Convert into a class
 def mobile_net_transfer_learning(IMG_HEIGHT, IMG_WIDTH, CHANNELS, train_ds):
-    # Transfer learning starts here
-
     # Pre processing the input for the MobileNetV2 model
     preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input 
 
     # Call the Pre trained MobileNetV2 to serve as the base model which will be fine tuned later
-
     # TODO Mobile Net max values are 224 x 224, therefore, the dataset needs to be resized from 250 x 250 to 224 x 224 (for this net in specific)
     INPUT_SHAPE = (IMG_HEIGHT, IMG_WIDTH, CHANNELS)
     base_model = tf.keras.applications.MobileNetV2(input_shape=INPUT_SHAPE,
@@ -159,6 +159,5 @@ def mobile_net_transfer_learning(IMG_HEIGHT, IMG_WIDTH, CHANNELS, train_ds):
     image_batch, label_batch = next(iter(train_ds))
     feature_batch = base_model(image_batch)
     print(feature_batch.shape)
-
 
     return base_model, preprocess_input

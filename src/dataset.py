@@ -8,14 +8,13 @@ import cv2
 
 load_dotenv()
 
-def download_dataset():
+def download_dataset(dataset_path):
     # 'username' and 'key' are in a .env file
     os.environ['KAGGLE_USERNAME']=os.getenv('username')
     os.environ['KAGGLE_KEY']=os.getenv('key')
 
-    datasets_path = "../datasets"
-    if not os.path.exists(datasets_path):
-        os.makedirs(datasets_path)
+    if not os.path.exists(dataset_path):
+        os.makedirs(dataset_path)
     
     # kaggle datasets download -d mohnishsaiprasad/forest-fire-images
     os.system('kaggle datasets download -d mohnishsaiprasad/forest-fire-images')
@@ -23,10 +22,11 @@ def download_dataset():
     with ZipFile('forest-fire-images.zip', 'r') as f:
         f.extractall('../datasets/')
 
+    os.remove('forest-fire-images.zip')
 
-def display_dataset_images():
-    fire_train_folder = '../datasets/Data/Train_Data/Fire/'
-    non_fire_train_folder = '../datasets/Data/Train_Data/Non_Fire/'
+def display_dataset_images(dataset_path):
+    fire_train_folder = dataset_path + '/Data/Train_Data/Fire/'
+    non_fire_train_folder = dataset_path + '/Data/Train_Data/Non_Fire/'
 
     num_images_load = 3
 
