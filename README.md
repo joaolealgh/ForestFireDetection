@@ -1,6 +1,6 @@
 # Forest Fires Detection
 
-![](https://github.com/ForstFireDetection/annotated_video.gif)
+![](https://github.com/joaolealgh/ForestFireDetection/blob/master/src/annotated_video.gif)
 
 ### Motivation
 This project aims to identify random fires that can start in forests. The motivation behind this project is based on the dozens of fires that occur every year in Portugal. Through the usage of Deep Learning models and IoT, systems installed in forests could detect fires as soon as they appear and allow for faster responses by the responsible authorities. This could help to diminish the damages that random fires cause to the environment and to the population close to those areas. This is relevant because every year several acres of land are burned, wildlife is lost, and several habitants lose their houses, and in extreme cases, their lives.
