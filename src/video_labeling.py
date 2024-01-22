@@ -47,9 +47,6 @@ def video_to_frames(video_path, output_path, model, frame_rate, video_width, vid
             # load image for writing the video
             img = cv2.imread(img_path)
 
-            # convert image to RGB
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
             # setup text
             font = cv2.FONT_HERSHEY_SIMPLEX
             textsize = cv2.getTextSize(prediction, font, 1, 2)[0]
@@ -69,9 +66,6 @@ def video_to_frames(video_path, output_path, model, frame_rate, video_width, vid
         else:
             # load image for writing the video
             img = cv2.imread(img_path)
-
-            # convert image to RGB
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
             # setup text
             font = cv2.FONT_HERSHEY_SIMPLEX
