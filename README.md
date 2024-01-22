@@ -32,6 +32,7 @@ This project aims to identify random fires that can start in forests. The motiva
 
 ### Steps to run
 
+- Install the requirements.txt
 - Create a .env file inside the /src folder with your kaggle API 'username' and 'key'
 - Run a Makefile command for TRAIN or INFERENCE
 - Done!

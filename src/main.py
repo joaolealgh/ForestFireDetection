@@ -3,8 +3,6 @@ import argparse
 
 import tensorflow as tf
 from matplotlib import pyplot as plt
-import numpy as np
-import cv2
 
 from dataset import download_dataset
 from dataset import display_dataset_images
@@ -16,6 +14,7 @@ from video_labeling import video_to_frames
 physical_devices = tf.config.list_physical_devices('GPU')
 print("Num GPUs:", len(physical_devices))
 
+# Necessary for WSL2 and OpenCV to work
 os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH")
 
 def train(transfer_model, download_ds, dataset_path, display_dataset, model_path):
@@ -35,11 +34,12 @@ def train(transfer_model, download_ds, dataset_path, display_dataset, model_path
     BATCH_SIZE = 8
     SEED = 123
     CHANNELS = 3
+    INITIAL_EPOCHS = 5
 
     train_ds, val_ds, test_ds = prepare_datasets(TRAIN_DATA_DIR, TEST_DATA_DIR, IMG_HEIGHT, IMG_WIDTH, BATCH_SIZE, SEED)
 
     base_model, preprocess_input = mobile_net_transfer_learning(IMG_HEIGHT, IMG_WIDTH, CHANNELS, train_ds)
-    model = forest_fire_model(preprocess_input, base_model, train_ds, val_ds, test_ds, epochs=5, model_path=model_path)
+    model = forest_fire_model(preprocess_input, base_model, train_ds, val_ds, test_ds, epochs=INITIAL_EPOCHS, model_path=model_path)
 
     # Positive values predict class 1 -> Non Fire
     # Negative values predict class 0 -> Fire
@@ -47,6 +47,7 @@ def train(transfer_model, download_ds, dataset_path, display_dataset, model_path
     # y_hat[y_hat > 0] = 1
     # y_hat[y_hat < 0] = 0
 
+    # TODO: Encapsulate in a function
     fig, ax = plt.subplots(nrows=8, ncols=6, figsize=(20, 40))
     j = 0
     for batch_x, batch_y in test_ds:
@@ -63,16 +64,16 @@ def train(transfer_model, download_ds, dataset_path, display_dataset, model_path
     plt.show()
 
 
-def main(action, base_model, download_ds, dataset_path, display_dataset, video_path, video_annotated, model_path):
+def main(action, base_model, download_ds, dataset_path, display_dataset, video_path, video_annotated, video_width, video_height, model_path):
     if action == 'TRAIN':
         train(base_model, download_ds, dataset_path, display_dataset, model_path)
 
     elif action == 'INFERENCE':
-        input_loc = 'Wildfires_101_National_Geographic.mp4'
-        output_loc = 'frames/'
+        # TODO: Allow user to choose the framerate and the frequency of frames to be predicted
+        frame_rate = 24
 
         model = load_custom_model(path=model_path)
-        video_to_frames(input_loc, output_loc, model)
+        video_to_frames(video_path=video_path, output_path=video_annotated, model=model, frame_rate=frame_rate, video_width=video_width, video_height=video_height)
 
 
 def run():
@@ -92,6 +93,7 @@ def run():
 
     parser.add_argument('--download-dataset',
                         default=False,
+                        type=bool,
                         help='Download dataset from original source')
 
     parser.add_argument('--dataset-path',
@@ -99,7 +101,8 @@ def run():
                         help='Path to download the dataset to')
 
     parser.add_argument('--display-dataset', 
-                        default=False, 
+                        default=False,
+                        type=bool,
                         help='Display a subset of images from dataset')
 
     parser.add_argument('--video-path',
@@ -108,6 +111,14 @@ def run():
     parser.add_argument('--video-annotated', 
                         default='outputs/',
                         help='Annotated video output path')
+    
+    parser.add_argument('--video-width',
+                        type=int,
+                        help='Input video width dimension')
+    
+    parser.add_argument('--video-height',
+                        type=int,
+                        help='Input video height dimension')
 
     parser.add_argument('--model-path', 
                         default='model/feature_extraction_model.h5', 
@@ -122,11 +133,13 @@ if __name__ =='__main__':
     
     action = args.action
     base_model = args.base_model
-    download_ds = bool(args.download_dataset)
+    download_ds = args.download_dataset
     dataset_path = args.dataset_path
-    display_dataset = bool(args.display_dataset)
+    display_dataset = args.display_dataset
     video_path = args.video_path
     video_annotated = args.video_annotated
+    video_width = args.video_width
+    video_height = args.video_height
     model_path = args.model_path
 
     main(action=action, 
@@ -136,4 +149,6 @@ if __name__ =='__main__':
          display_dataset=display_dataset, 
          video_path=video_path, 
          video_annotated=video_annotated, 
+         video_width=video_width,
+         video_height=video_height,
          model_path=model_path)

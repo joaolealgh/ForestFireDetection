@@ -1,5 +1,5 @@
-run_train:
+train:
 	python3 main.py --action TRAIN
 
-run_inference:
-	python3 main.py --action INFERENCE --video-path Wildfires_101_National_Geographic.mp4
+inference:
+	python3 main.py --action INFERENCE --video-path Wildfires_101_National_Geographic.mp4 --video-width 854 --video-height 480

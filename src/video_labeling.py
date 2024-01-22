@@ -6,25 +6,16 @@ import cv2
 
 from forest_fire_model import predict_fire
 
-def video_to_frames(input_loc, output_loc, model):
-    """Function to extract frames from input video file
-    and save them as separate frames in an output directory.
-    Args:
-        input_loc: Input video file.
-        output_loc: Output directory to save the frames.
-    Returns:
-        None
-    """
-
+def video_to_frames(video_path, output_path, model, frame_rate, video_width, video_height):
     fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
-    video = cv2.VideoWriter('video.avi', fourcc, 24, (854, 480))
+    video = cv2.VideoWriter('video.avi', fourcc, frame_rate, (video_width, video_height))
 
-    if not os.path.isdir(output_loc):
-        os.mkdir(output_loc)
+    if not os.path.isdir(output_path):
+        os.mkdir(output_path)
     # Log the time
     time_start = time.time()
     # Start capturing the feed
-    cap = cv2.VideoCapture(input_loc)
+    cap = cv2.VideoCapture(video_path)
     # Find the number of frames
     video_length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) - 1
     print ("Number of frames: ", video_length)
@@ -40,9 +31,10 @@ def video_to_frames(input_loc, output_loc, model):
         ret, frame = cap.read()
         if not ret:
             continue
+        
         # Write the results back to output location.
-        img_name = "temp-frame" + str(frame_count) + ".png"
-        img_path = output_loc + img_name
+        img_name = f"temp_frame_{frame_count}.png"
+        img_path = output_path + img_name
 
         cv2.imwrite(img_path, frame)
 
@@ -51,7 +43,6 @@ def video_to_frames(input_loc, output_loc, model):
             img = img_to_array(img)
             img = np.array([img])
             prediction = predict_fire(model, img)[0][0]
-            # print(prediction)
 
             # load image for writing the video
             img = cv2.imread(img_path)
